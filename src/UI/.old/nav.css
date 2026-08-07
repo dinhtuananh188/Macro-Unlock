@@ -1,3 +1,12 @@
+@font-face {
+    font-family: myFont;
+    src: url(fonts/Monsterat.ttf)
+}
+
+*{
+    font-family: myFont;
+}
+
 /* Sidebar Navigation */
 .app-layout {
     display: flex;

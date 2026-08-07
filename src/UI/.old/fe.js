@@ -13,6 +13,40 @@ const STORAGE_KEY = "selectedCombo"
 const SIGN_KEY_STORAGE = "comboSignKeys" // NEW: { comboValue: "KeyName", ... }
 const FPS_STORAGE = "FPS" // NEW: store FPS value
 
+// ── DEBUG HELPER ─────────────────────────────────────────────────────────────
+function showStatusBanner(msg, isError = false) {
+    let banner = document.getElementById('__debugBanner')
+    if (!banner) {
+        banner = document.createElement('div')
+        banner.id = '__debugBanner'
+        banner.style.cssText = [
+            'position:fixed', 'top:0', 'left:0', 'right:0',
+            'padding:6px 12px', 'font-size:12px', 'z-index:9999',
+            'word-break:break-all', 'white-space:pre-wrap'
+        ].join(';')
+        document.body.prepend(banner)
+    }
+    banner.style.background = isError ? '#c0392b' : '#27ae60'
+    banner.style.color = '#fff'
+    banner.textContent = msg
+    if (!isError) setTimeout(() => { if (banner.textContent === msg) banner.textContent = '' }, 3000)
+}
+
+function dbgFetch(url, opts) {
+    console.log('[fe.js] fetch ->', url, opts)
+    return fetch(url, opts)
+        .then(res => {
+            console.log('[fe.js] fetch OK', url, res.status)
+            return res
+        })
+        .catch(err => {
+            const msg = `[fe.js] FETCH ERROR: ${url}\n${err}\nBackend có thể chưa khởi động xong hoặc port 5000 bị chặn.`
+            console.error(msg)
+            showStatusBanner(msg, true)
+            throw err
+        })
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const chooseTb = document.getElementById("chooseTb")
     const saveBtn = document.getElementById("saveBtn")
@@ -243,11 +277,12 @@ document.addEventListener("DOMContentLoaded", () => {
         runActive = !runActive
         runBtn.classList.toggle("run-active", runActive)
         runBtn.textContent = runActive ? "⏹ STOP" : "▶ RUN"
-        fetch("http://localhost:5000/run", {
+        dbgFetch("http://localhost:5000/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ enabled: runActive })
-        }).catch(() => { })
+        }).then(() => showStatusBanner(runActive ? 'Macro đang chạy' : 'Macro đã dừng'))
+          .catch(() => { })
     })
 
     // ── Save button ──────────────────────────────────────────────────────────
@@ -265,11 +300,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // POST full config to Python backend — preserve customCombos
         let customCombos = []
         try { customCombos = JSON.parse(localStorage.getItem("customCombos")) || [] } catch {}
-        fetch("http://localhost:5000/save", {
+        dbgFetch("http://localhost:5000/save", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ comboSignKeys: loadSignKeys(), FPS: LoadFPS(), customCombos })
-        }).catch(() => { })
+        }).then(() => showStatusBanner('Đã lưu cấu hình thành công'))
+          .catch(() => { })
 
         refreshBindUI()
 
