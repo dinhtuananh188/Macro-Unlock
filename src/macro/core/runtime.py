@@ -236,12 +236,7 @@ def skkC0_EQA_60f(fps):
 # mavuika.json, MAVUIKA_COMBOS (runtime.py), BUILTIN_COMBOS (src/UI/db.js).
 MAVUIKA_COMBOS = (
     "C0:  Combo Mavuika CDCDCF (Full Combo)",
-    "C0:  Combo Mavuika Melt",
     # ── Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT) ──
-    "C0:  Combo Mavuika Overload (GI)",
-    "C0:  Combo Mavuika Vape (GI)",
-    "C0:  Combo Mavuika Hybrid Overload (GI)",
-    "C0:  Combo Mavuika Melt (GI)",
     "C0:  Combo Arlecchino Overload N2W (GI)",
 )
 
@@ -272,8 +267,6 @@ STEP_MAP = {
     "skk5a":        skk5a,          # n5  – đã thêm
     # ── Mavuika: dùng trong custom combo, key = tên trong mavuika.json ──
     "mav_cdcdcf":   _MAVUIKA_FNS[MAVUIKA_COMBOS[0]],
-    "mav_cd":       _MAVUIKA_FNS[MAVUIKA_COMBOS[1]],
-    "mav_overload": _MAVUIKA_FNS[MAVUIKA_COMBOS[2]],
     # ── Mavuika: nhịp nhỏ cho combo tự tạo (số liệu từ Mav OL full rotation.amc) ──
     "mav_b_q":      mav_combo("beat_q"),
     "mav_b_c":      mav_combo("beat_c"),

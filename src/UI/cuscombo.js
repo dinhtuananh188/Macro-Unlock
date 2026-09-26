@@ -53,8 +53,6 @@ const SKIRK_ACTIONS = Object.freeze([
 /* Đã bỏ khỏi bảng chèn nhưng giữ để combo cũ đã lưu không mất khối khi mở lại. */
 const LEGACY_ACTIONS = Object.freeze([
     { label: "mav_cdcdcf", pythonFunction: "mav_cdcdcf" },
-    { label: "mav_cd", pythonFunction: "mav_cd" },
-    { label: "mav_overload", pythonFunction: "mav_overload" },
     { label: "D (nhịp)", pythonFunction: "mav_b_d" },
     { label: "C giữ", pythonFunction: "mav_c_hold" },
     { label: "C nhả", pythonFunction: "mav_c_rel" },
