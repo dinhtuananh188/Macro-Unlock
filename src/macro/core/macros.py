@@ -372,168 +372,6 @@ _MAV_FALLBACK = {
                 ]
             ]
         },
-        "C0:  Combo Mavuika CD (Short Loop)": {
-            "mode": "loop",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    200,
-                    "d_down"
-                ],
-                [
-                    250,
-                    "d_up"
-                ],
-                [
-                    320,
-                    "c_up"
-                ],
-                [
-                    1320,
-                    "end"
-                ]
-            ]
-        },
-        "C0:  Combo Mavuika Overload Q C 3(DCDCCF) DCF": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "q_down"
-                ],
-                [
-                    202,
-                    "q_up"
-                ],
-                [
-                    1757,
-                    "c_down"
-                ],
-                [
-                    2057,
-                    "c_up"
-                ],
-                [
-                    2117,
-                    "c_down"
-                ],
-                [
-                    2317,
-                    "d_down"
-                ],
-                [
-                    2408,
-                    "d_up"
-                ],
-                [
-                    2559,
-                    "c_up"
-                ],
-                [
-                    2649,
-                    "c_down"
-                ],
-                [
-                    2849,
-                    "d_down"
-                ],
-                [
-                    2940,
-                    "d_up"
-                ],
-                [
-                    3940,
-                    "c_up"
-                ],
-                [
-                    4793,
-                    "c_down"
-                ],
-                [
-                    4993,
-                    "d_down"
-                ],
-                [
-                    5085,
-                    "d_up"
-                ],
-                [
-                    5235,
-                    "c_up"
-                ],
-                [
-                    5325,
-                    "c_down"
-                ],
-                [
-                    5525,
-                    "d_down"
-                ],
-                [
-                    5616,
-                    "d_up"
-                ],
-                [
-                    6617,
-                    "c_up"
-                ],
-                [
-                    7474,
-                    "c_down"
-                ],
-                [
-                    7674,
-                    "d_down"
-                ],
-                [
-                    7765,
-                    "d_up"
-                ],
-                [
-                    7916,
-                    "c_up"
-                ],
-                [
-                    8006,
-                    "c_down"
-                ],
-                [
-                    8206,
-                    "d_down"
-                ],
-                [
-                    8297,
-                    "d_up"
-                ],
-                [
-                    9297,
-                    "c_up"
-                ],
-                [
-                    10148,
-                    "c_down"
-                ],
-                [
-                    10348,
-                    "d_down"
-                ],
-                [
-                    10439,
-                    "d_up"
-                ],
-                [
-                    10589,
-                    "c_up"
-                ],
-                [
-                    10589,
-                    "end"
-                ]
-            ]
-        },
         "C0:  Combo Mavuika Melt": {
             "_nguon": "File 'melt.xml' (Mav combo melt), delay giay x1000",
             "_ghichu": "C 2.25s nha F, nghi 0.85s, roi 3 nhip: giu C, bam giu Shift 0.9s, nha Shift+C cung luc. Giu nut chay 1 lan, nha nut = ngat.",
@@ -780,6 +618,10 @@ def _mav_release_all():
                     lambda: keyboard.release(shift),
                     lambda: keyboard.release("q"),
                     lambda: keyboard.release("1"),
+                    lambda: keyboard.release("e"),
+                    lambda: keyboard.release("w"),
+                    lambda: keyboard.release("a"),
+                    lambda: keyboard.release("d"),
                     lambda: mouse.release(right)):
         try:
             release()
@@ -814,6 +656,15 @@ _MAV_ACTIONS = {
     "r_up":   lambda: mouse.release(right),
     "k1_down": lambda: keyboard.press("1"),
     "k1_up":   lambda: keyboard.release("1"),
+    "e_down": lambda: keyboard.press("e"),
+    "e_up":   lambda: keyboard.release("e"),
+    "w_down": lambda: keyboard.press("w"),
+    "w_up":   lambda: keyboard.release("w"),
+    # Phim A/D di chuyen that su (khac "d_down/d_up" = Shift/dash o tren).
+    "ka_down": lambda: keyboard.press("a"),
+    "ka_up":   lambda: keyboard.release("a"),
+    "kd_down": lambda: keyboard.press("d"),
+    "kd_up":   lambda: keyboard.release("d"),
     "end":    None,
 }
 

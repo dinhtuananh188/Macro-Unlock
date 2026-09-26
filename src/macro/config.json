@@ -59,6 +59,527 @@
         "is_no_key_pressed",
         "skk5a"
       ]
+    },
+    {
+      "id": "1883e65b-9919-4ac3-90ce-d50567fba694",
+      "name": "Video Mavuika 0:00-0:09 (R + chuột trái)",
+      "hotkey": null,
+      "clips": [
+        {
+          "id": "fa3ad51d-59a2-43fd-9547-3bdd85587b82",
+          "kind": "key",
+          "track": 0,
+          "start": 0,
+          "dur": 350,
+          "key": "r"
+        },
+        {
+          "id": "a9a8f1fa-1918-4ec3-8a26-bc37c4af8840",
+          "kind": "key",
+          "track": 0,
+          "start": 450,
+          "dur": 300,
+          "key": "r"
+        },
+        {
+          "id": "937dd5b8-7b4f-4bc2-875f-39cd415e9c31",
+          "kind": "key",
+          "track": 0,
+          "start": 1100,
+          "dur": 150,
+          "key": "r"
+        },
+        {
+          "id": "8f9d1292-861c-4ece-94c5-07df6c5bacac",
+          "kind": "key",
+          "track": 0,
+          "start": 1550,
+          "dur": 1300,
+          "key": "r"
+        },
+        {
+          "id": "77fc6bd2-c52f-465f-826a-a6b040fbb058",
+          "kind": "key",
+          "track": 0,
+          "start": 4100,
+          "dur": 100,
+          "key": "r"
+        },
+        {
+          "id": "7ef20bf8-a141-45f1-826f-7981fdadefe6",
+          "kind": "key",
+          "track": 0,
+          "start": 4250,
+          "dur": 100,
+          "key": "r"
+        },
+        {
+          "id": "11642ad2-9bc2-4890-9e13-e45be3f8ba73",
+          "kind": "key",
+          "track": 0,
+          "start": 4550,
+          "dur": 1300,
+          "key": "r"
+        },
+        {
+          "id": "655d3dc5-7c1c-44d3-a50c-d2c39562e068",
+          "kind": "key",
+          "track": 0,
+          "start": 6900,
+          "dur": 1250,
+          "key": "r"
+        },
+        {
+          "id": "071f4806-efe6-4c20-80b8-77da3fe7155f",
+          "kind": "mouse",
+          "track": 1,
+          "start": 550,
+          "dur": 200,
+          "button": "left"
+        },
+        {
+          "id": "bbf3c5ae-a7d0-40a2-94cd-f00a72742b76",
+          "kind": "mouse",
+          "track": 1,
+          "start": 1750,
+          "dur": 200,
+          "button": "left"
+        },
+        {
+          "id": "b85a3013-cfd8-47c2-9612-ba47eb73aa93",
+          "kind": "mouse",
+          "track": 1,
+          "start": 4750,
+          "dur": 200,
+          "button": "left"
+        },
+        {
+          "id": "d0223d35-58d2-4069-a732-811c42a88e1b",
+          "kind": "mouse",
+          "track": 1,
+          "start": 7050,
+          "dur": 200,
+          "button": "left"
+        }
+      ],
+      "loop": null,
+      "timeline": [
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 350
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 350
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 150
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 300
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 1250
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 1050
+        },
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        {
+          "type": "wait",
+          "ms": 150
+        },
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        {
+          "type": "key_up",
+          "key": "r"
+        }
+      ],
+      "pythonSequence": [
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 350
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 350
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 150
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 300
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 1250
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 50
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 100
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 1050
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_down",
+          "key": "r"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 150
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_down",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 200
+        },
+        "is_no_key_pressed",
+        {
+          "type": "mouse_up",
+          "button": "left"
+        },
+        "is_no_key_pressed",
+        {
+          "type": "wait",
+          "ms": 900
+        },
+        "is_no_key_pressed",
+        {
+          "type": "key_up",
+          "key": "r"
+        }
+      ]
     }
   ]
 }

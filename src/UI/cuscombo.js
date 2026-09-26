@@ -83,7 +83,6 @@ const CUSTOM_COMBOS_STORAGE = "customCombos";
 const SIGN_KEYS_STORAGE = "comboSignKeys";
 const FPS_STORAGE = "FPS";
 const CLIPBOARD_STORAGE = "comboClipboard";
-const TRACKER_STORAGE = "trackerSteps";
 const ZOOM_STORAGE = "comboTimelineZoom";
 
 const HISTORY_LIMIT = 100;
@@ -199,8 +198,7 @@ const ICONS = Object.freeze({
     zoomOut: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8 11h6"/>',
     fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
     gap: '<path d="M4 4v16M20 4v16"/><path d="M8 12h8M8 12l3-3M8 12l3 3M16 12l-3-3M16 12l-3 3"/>',
-    track: '<path d="M4 6h16M4 12h16M4 18h9"/><path d="M18 15v6M15 18h6"/>',
-    import: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>'
+    track: '<path d="M4 6h16M4 12h16M4 18h9"/><path d="M18 15v6M15 18h6"/>'
 });
 
 const state = {
@@ -327,7 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
         clearHotkey: document.getElementById("clearHotkey"),
         pythonPreview: document.getElementById("pythonPreview"),
         saveButton: document.getElementById("saveCombo"),
-        newComboButton: document.getElementById("newComboButton"),
         savedCount: document.getElementById("savedCount"),
         saveStatus: document.getElementById("saveStatus")
     });
@@ -343,21 +340,11 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSavedCount();
     bindEvents();
 
-    // Mở đứng riêng (không nằm trong cửa sổ modal): có đường quay về danh sách combo.
-    if (window.top === window) {
-        const back = document.getElementById("backLink");
-        if (back) back.hidden = false;
-    }
-
     // ── Edit mode: load combo from config if URL has ?edit=<id> ──
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("edit");
     if (editId) {
         loadComboForEdit(editId);
-    } else if (params.get("import") === "tracker") {
-        // Từ Tracker sang: nhập luôn, rồi bỏ tham số để tải lại trang không nhập trùng.
-        importTrackerSteps();
-        history.replaceState(null, "", "cuscombo.html");
     }
 });
 
@@ -374,10 +361,9 @@ function bindEvents() {
 
     elements.hotkeyCapture.addEventListener("click", startHotkeyCapture);
     elements.clearHotkey.addEventListener("click", clearHotkey);
-    elements.newComboButton.addEventListener("click", createNewCombo);
     elements.saveButton.addEventListener("click", saveCombo);
 
-    // Ctrl+V: ưu tiên clipboard hệ thống (dán JSON từ Tracker / cửa sổ khác), không có thì dùng bản copy trong trình tạo.
+    // Ctrl+V: ưu tiên clipboard hệ thống (dán JSON từ cửa sổ khác), không có thì dùng bản copy trong trình tạo.
     window.addEventListener("paste", (event) => {
         if (isBusy() || isTextField(event)) return;
         event.preventDefault();
@@ -517,7 +503,6 @@ function buildAddBar() {
         { icon: "mouse", label: "RC", title: "Thêm clip giữ chuột phải tại đầu phát", run: () => addMouseClip("right") },
         { icon: "gap", label: "K.trống", title: "Chèn khoảng trống — đẩy mọi clip từ đầu phát trở đi sang phải một đoạn (clip đang vắt qua đầu phát thì giữ lâu thêm)", run: insertGap, withInput: true },
         { icon: "track", label: "+Track", title: "Thêm một track trống", run: addTrack },
-        { icon: "import", label: "Tracker", title: "Nhập các bước vừa đo từ Tracker màn hình, đặt tại đầu phát", run: importTrackerSteps },
         { icon: "block", label: "Skirk", title: "Chèn khối dựng sẵn của Skirk (không bắt buộc)", run: toggleBlockPanel, id: "blockBtn" }
     ];
     items.forEach((entry) => {
@@ -827,7 +812,7 @@ function copySelection(cut = false) {
     }
 }
 
-// Chuỗi JSON -> clip tương đối: nhận bản copy của trình tạo lẫn danh sách bước phẳng (Tracker, combo cũ).
+// Chuỗi JSON -> clip tương đối: nhận bản copy của trình tạo lẫn danh sách bước phẳng (combo cũ).
 function clipsFromData(data) {
     if (data && Array.isArray(data.skirkClips)) {
         return data.skirkClips.filter((clip) => ["key", "mouse", "block"].includes(clip?.kind));
@@ -868,7 +853,7 @@ async function pasteClipboard(systemText) {
 
 // Đặt nhóm clip tương đối vào timeline tại thời điểm `at`, track trên cùng là `track`.
 // Cả nhóm dời xuống cùng một số track cho tới khi không đè clip nào, để giữ nguyên
-// bố cục (vd mỗi phím một track từ Tracker) thay vì đẩy lẻ từng clip.
+// bố cục (vd mỗi phím một track) thay vì đẩy lẻ từng clip.
 function placeClips(relative, at, track) {
     const placed = relative.map((clip) => ({ ...clip, start: clampMs(at + clip.start) }));
     const fits = (offset) => placed.every((clip) => {
@@ -1985,7 +1970,7 @@ function compileClips(clips = state.clips, loop = state.loop) {
     return steps;
 }
 
-// Bước phẳng (combo cũ / Tracker) → clip. Chờ cộng dồn thời gian; Nhấn mở clip, Nhả đóng clip.
+// Bước phẳng (combo cũ) → clip. Chờ cộng dồn thời gian; Nhấn mở clip, Nhả đóng clip.
 function stepsToClips(steps) {
     const clips = [];
     const open = new Map();
@@ -2046,21 +2031,6 @@ function stepsToClips(steps) {
         ends[track] = clipEnd(clip);
     });
     return { clips, loop };
-}
-
-// ── Nhập từ Tracker ─────────────────────────────────────────────────────────
-function importTrackerSteps() {
-    const data = loadJsonStorage(TRACKER_STORAGE, []);
-    const clips = clipsFromData(data);
-    if (!clips.length) {
-        showStatus("Chưa có dữ liệu từ Tracker. Mở Tracker, quét video rồi bấm Gửi.", "error");
-        return false;
-    }
-    const added = placeClips(clips, state.playhead, state.activeTrack);
-    zoomToFit();
-    const tracks = new Set(added.map((clip) => clip.track)).size;
-    showStatus(`Đã nhập ${added.length} clip (${tracks} track) từ Tracker tại ${formatMs(state.playhead)}. Kiểm tra lại, cắt bớt phần thừa rồi đặt tên và Save Combo.`, "success");
-    return true;
 }
 
 // ── Kiểm tra trước khi lưu ──────────────────────────────────────────────────
@@ -2325,26 +2295,6 @@ async function saveCombo() {
         // Renderer still preserves data locally when backend has not started yet.
         showStatus("Đã lưu cục bộ. Backend chưa phản hồi.", "error");
     }
-}
-
-function createNewCombo() {
-    if (state.recording) stopRecording();
-    if (state.playing) stopPlay();
-    cancelClipKeyCapture();
-    state.comboId = createId();
-    state.clips = [];
-    state.tracks = MIN_TRACKS;
-    state.loop = null;
-    state.playhead = 0;
-    state.activeTrack = 0;
-    state.hotkey = null;
-    resetHistory();
-    clearSelection();
-    elements.comboName.value = "";
-    updateHotkeyUI();
-    render();
-    showStatus("Sẵn sàng tạo Combo mới.");
-    elements.comboName.focus();
 }
 
 function loadCustomCombos() {

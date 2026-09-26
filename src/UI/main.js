@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, shell, session, desktopCapturer } = require('electron');
+const { app, BrowserWindow, dialog, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -304,12 +304,6 @@ async function createWindow() {
 
 app.whenReady().then(async () => {
     ensureLogDir();
-    // Tracker man hinh (tracker.html): tra ve man hinh chinh khi trang goi getDisplayMedia
-    session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-        desktopCapturer.getSources({ types: ['screen'] })
-            .then((sources) => callback(sources.length ? { video: sources[0] } : {}))
-            .catch(() => callback({}));
-    });
     logE(`Log file: ${LOG_FILE}`);
     startPython();
     await createWindow();

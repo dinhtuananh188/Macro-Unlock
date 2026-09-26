@@ -13,6 +13,7 @@ Bao gồm:
   - on_press / on_release / on_click
 """
 
+import ctypes
 import threading
 import time
 from pynput.keyboard import Key, KeyCode
@@ -63,6 +64,50 @@ _macros.should_abort_once = lambda: not is_game_foreground()
 BLOCKED_HOLD_BINDS = frozenset({
     Button.left, Button.right, Key.shift, Key.shift_l, Key.shift_r,
 })
+
+
+# ── Độ chính xác timing khi combo đang chạy ──────────────────────────────────
+# Học từ GI-Macro-Manager (StartTimerResolution/StopTimerResolution):
+# time.sleep() trên Windows mặc định làm tròn theo chu kỳ timer hệ thống
+# (thường 15.6ms) nên các bước wait_exact/_wait_or_abort (sleep 1ms rồi mới
+# busy-wait 2ms cuối) có thể bị trễ quá đà nhiều ms mỗi bước, cộng dồn lệch
+# cả combo dài. timeBeginPeriod(1) hạ chu kỳ đó xuống ~1ms; Above/High priority
+# giảm khả năng bị hệ điều hành giành CPU giữa chừng. Chỉ bật khi có combo
+# đang chạy (đếm tham chiếu vì nhiều worker có thể chạy song song), tắt lại
+# khi combo cuối cùng kết thúc để không ảnh hưởng máy lúc rảnh.
+_winmm = ctypes.WinDLL("winmm")
+_timer_res_lock  = threading.Lock()
+_timer_res_count = 0
+
+HIGH_PRIORITY_CLASS = 0x00000080
+
+
+def _start_timer_resolution():
+    global _timer_res_count
+    with _timer_res_lock:
+        _timer_res_count += 1
+        if _timer_res_count == 1:
+            try:
+                _winmm.timeBeginPeriod(1)
+                handle = ctypes.windll.kernel32.GetCurrentProcess()
+                ctypes.windll.kernel32.SetPriorityClass(handle, HIGH_PRIORITY_CLASS)
+            except Exception as e:
+                log_debug(f"_start_timer_resolution loi: {e}")
+
+
+def _stop_timer_resolution():
+    global _timer_res_count
+    with _timer_res_lock:
+        if _timer_res_count == 0:
+            return
+        _timer_res_count -= 1
+        if _timer_res_count == 0:
+            try:
+                _winmm.timeEndPeriod(1)
+                handle = ctypes.windll.kernel32.GetCurrentProcess()
+                ctypes.windll.kernel32.SetPriorityClass(handle, 0x00000020)  # NORMAL_PRIORITY_CLASS
+            except Exception as e:
+                log_debug(f"_stop_timer_resolution loi: {e}")
 
 
 # ── Named combo sequences ─────────────────────────────────────────────────────
@@ -187,12 +232,17 @@ def skkC0_EQA_60f(fps):
     skk5as(fps)
 
 
-# Ten combo Mavuika = key trong mavuika.json. Doi ten o day phai doi ca 2 noi.
+# Ten combo Mavuika = key trong mavuika.json. Doi ten o day phai doi ca 3 noi:
+# mavuika.json, MAVUIKA_COMBOS (runtime.py), BUILTIN_COMBOS (src/UI/db.js).
 MAVUIKA_COMBOS = (
     "C0:  Combo Mavuika CDCDCF (Full Combo)",
-    "C0:  Combo Mavuika CD (Short Loop)",
-    "C0:  Combo Mavuika Overload Q C 3(DCDCCF) DCF",
     "C0:  Combo Mavuika Melt",
+    # ── Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT) ──
+    "C0:  Combo Mavuika Overload (GI)",
+    "C0:  Combo Mavuika Vape (GI)",
+    "C0:  Combo Mavuika Hybrid Overload (GI)",
+    "C0:  Combo Mavuika Melt (GI)",
+    "C0:  Combo Arlecchino Overload N2W (GI)",
 )
 
 _MAVUIKA_FNS = {name: mav_combo(name) for name in MAVUIKA_COMBOS}
@@ -490,22 +540,26 @@ def worker(key):
     _thread_local.bind_key = key
     log_debug(f"Worker thread started for key: {key}")
 
-    while running_states.get(key, False):
-        fn = active_bindings.get(key)
-        if fn is None:
-            log_debug(f"Worker: no function bound to {key}")
-            break
-        try:
-            log_debug(f"Worker: executing {fn.__name__}")
-            fn(FPSinput)
-            log_debug(f"Worker: finished {fn.__name__}")
-        except Exception as e:
-            import traceback
-            log_debug(f"Worker Exception running {fn.__name__}: {e}")
-            log_debug(traceback.format_exc())
-            # BUG FIX: reset state để lần nhấn phím tiếp theo có thể khởi động lại
-            running_states[key] = False
-            break
+    _start_timer_resolution()
+    try:
+        while running_states.get(key, False):
+            fn = active_bindings.get(key)
+            if fn is None:
+                log_debug(f"Worker: no function bound to {key}")
+                break
+            try:
+                log_debug(f"Worker: executing {fn.__name__}")
+                fn(FPSinput)
+                log_debug(f"Worker: finished {fn.__name__}")
+            except Exception as e:
+                import traceback
+                log_debug(f"Worker Exception running {fn.__name__}: {e}")
+                log_debug(traceback.format_exc())
+                # BUG FIX: reset state để lần nhấn phím tiếp theo có thể khởi động lại
+                running_states[key] = False
+                break
+    finally:
+        _stop_timer_resolution()
 
     log_debug(f"Worker thread stopped for key: {key}")
 

@@ -3,9 +3,13 @@ const BUILTIN_COMBOS = [
     "C0:  Combo Skirk C0 EA 120fps",
     "C0:  Combo Skirk C0 EQA 60fps",
     "C0:  Combo Mavuika CDCDCF (Full Combo)",
-    "C0:  Combo Mavuika CD (Short Loop)",
-    "C0:  Combo Mavuika Overload Q C 3(DCDCCF) DCF",
-    "C0:  Combo Mavuika Melt"
+    "C0:  Combo Mavuika Melt",
+    // Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT)
+    "C0:  Combo Mavuika Overload (GI)",
+    "C0:  Combo Mavuika Vape (GI)",
+    "C0:  Combo Mavuika Hybrid Overload (GI)",
+    "C0:  Combo Mavuika Melt (GI)",
+    "C0:  Combo Arlecchino Overload N2W (GI)"
 ];
 
 let currentConfig = { comboSignKeys: {}, FPS: 120, customCombos: [] };
@@ -189,7 +193,7 @@ async function reloadCombos() {
     renderCombosFromConfig();
 }
 
-// Combo có thể vừa được lưu ở cửa sổ khác (Tracker → trình tạo combo): quay lại thì nạp lại danh sách.
+// Combo có thể vừa được lưu ở cửa sổ khác (trình tạo combo): quay lại thì nạp lại danh sách.
 window.addEventListener("focus", () => {
     const modal = document.getElementById("comboModal");
     if (modal && !modal.classList.contains("hidden")) return;
