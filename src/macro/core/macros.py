@@ -705,3 +705,190 @@ def mav_combo(name):
     run.__name__ = "mav_" + "".join(ch if ch.isalnum() else "_" for ch in name)[:40]
     run.uses_held_input = True
     return run
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# COMBO DỰNG SẴN – toàn bộ chuỗi combo + bảng tra nằm ở đây.
+# Thêm combo mới: viết hàm, đăng ký vào COMBO_MAP, rồi thêm đúng tên đó vào
+# BUILTIN_COMBOS trong src/UI/shared.js để giao diện hiện ra.
+# ════════════════════════════════════════════════════════════════════════════
+
+# ── Named combo sequences ─────────────────────────────────────────────────────
+
+def skk223_loop(fps):
+    """Lặp vô hạn 2-2-3 cho đến khi nhả phím."""
+    start = time.perf_counter()
+    while time.perf_counter() - start < 20:
+        skk2as(fps)
+        skk2as(fps)
+        skk3aw(fps)
+        if should_abort():
+            break
+
+
+def skkC0_EQA_120f(fps):
+    """C0: 222q 223 223 22cd23 223  –  tối ưu cho ~120 fps."""
+    skke(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2aq(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2azs_slow(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+
+
+def skkC0_QEA_120f(fps):
+    """C0: 222c 223 223 22cd23 223  –  biến thể QEA ~120 fps."""
+    skke(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2az(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2azs_slow(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+
+
+def skkC0_EQA_60f(fps):
+    """C0: 222q 223 223 22c 224  –  tối ưu cho ~60 fps."""
+    skke(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2aq(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk3aw(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2az(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk2as(fps)
+    if should_abort(): return
+    skk5as(fps)
+
+
+# Ten combo Mavuika = key trong mavuika.json. Doi ten o day phai doi ca 3 noi:
+# mavuika.json, MAVUIKA_COMBOS (file nay), BUILTIN_COMBOS (src/UI/shared.js).
+MAVUIKA_COMBOS = (
+    "C0:  Combo Mavuika CDCDCF (Full Combo)",
+    # ── Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT) ──
+    "C0:  Combo Arlecchino Overload N2W (GI)",
+)
+
+_MAVUIKA_FNS = {name: mav_combo(name) for name in MAVUIKA_COMBOS}
+
+
+# ── Combo map & step map ──────────────────────────────────────────────────────
+
+COMBO_MAP = {
+    "C0:  Combo Skirk C0 EQA 120fps": skkC0_EQA_120f,
+    "C0:  Combo Skirk C0 EA 120fps":  skkC0_QEA_120f,
+    "C0:  Combo Skirk C0 EQA 60fps":  skkC0_EQA_60f,
+    **_MAVUIKA_FNS,
+}
+
+# BUG FIX: thêm skk2a và skk5a (thiếu trong phiên bản cũ, custom combo cần)
+STEP_MAP = {
+    "skk3aw":       skk3aw,
+    "skk2as":       skk2as,
+    "skk2a":        skk2a,          # n2  – đã thêm
+    "skk3as":       skk3as,
+    "skk2az":       skk2az,
+    "skk2azs":      skk2azs,
+    "skk2azs_slow": skk2azs_slow,
+    "skk2aq":       skk2aq,
+    "skke":         skke,
+    "skk5as":       skk5as,
+    "skk5a":        skk5a,          # n5  – đã thêm
+    # ── Mavuika: dùng trong custom combo, key = tên trong mavuika.json ──
+    "mav_cdcdcf":   _MAVUIKA_FNS[MAVUIKA_COMBOS[0]],
+    # ── Mavuika: nhịp nhỏ cho combo tự tạo (số liệu từ Mav OL full rotation.amc) ──
+    "mav_b_q":      mav_combo("beat_q"),
+    "mav_b_c":      mav_combo("beat_c"),
+    "mav_b_d":      mav_combo("beat_d"),
+    "mav_b_cd":     mav_combo("beat_cd"),
+    "mav_b_cdf":    mav_combo("beat_cdf"),
+    "mav_b_click":  mav_combo("beat_click"),
+    "mav_b_click2": mav_combo("beat_click2"),
+    # ── Mavuika: nút rời, tự ghép lấy nhịp ──
+    "mav_c_hold":   mav_press_c,
+    "mav_c_rel":    mav_release_c,
+    "mav_d":        mav_tap_d,
+    "mav_q":        mav_tap_q,
+    # ── Khối chờ ──
+    "wait_50":     mav_wait(50),
+    "wait_100":    mav_wait(100),
+    "wait_150":    mav_wait(150),
+    "wait_200":    mav_wait(200),
+    "wait_300":    mav_wait(300),
+    "wait_500":    mav_wait(500),
+    "wait_1000":   mav_wait(1000),
+}

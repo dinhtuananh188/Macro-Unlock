@@ -17,6 +17,17 @@ window.addEventListener('keydown', (e) => {
     }
 }, true);
 
+// ── Combo dựng sẵn ──────────────────────────────────────────────────────────
+// Tên phải khớp đúng key trong COMBO_MAP (src/macro/core/macros.py).
+const BUILTIN_COMBOS = [
+    "C0:  Combo Skirk C0 EQA 120fps",
+    "C0:  Combo Skirk C0 EA 120fps",
+    "C0:  Combo Skirk C0 EQA 60fps",
+    "C0:  Combo Mavuika CDCDCF (Full Combo)",
+    // Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT)
+    "C0:  Combo Arlecchino Overload N2W (GI)"
+];
+
 // ── State keys ───────────────────────────────────────────────────────────────
 const STATE_RUN = 'macro_run_active';
 
