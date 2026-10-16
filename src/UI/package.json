@@ -34,10 +34,6 @@
         {
           "from": "../unlocker",
           "to": "unlocker"
-        },
-        {
-          "from": "../macro/mavuika.json",
-          "to": "mavuika.json"
         }
       ]
     },

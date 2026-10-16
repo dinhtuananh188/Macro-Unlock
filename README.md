@@ -12,7 +12,7 @@
   - Kéo mép clip để chỉnh thời gian giữ, đặt vùng lặp trên thước thời gian
   - Khối Skirk có thời lượng cố định theo FPS
 - Hỗ trợ tạo nhiều combo custom và mỗi combo 1 phím tắt
-- Timing combo Mavuika nằm trong `mavuika.json` cạnh `config.json`, sửa file là app đọc lại ngay, không cần build
+- Toàn bộ combo dựng sẵn (kể cả timing Mavuika) nằm trong `src/macro/core/macros.py`
 - Người dùng có thể tự do bật tắt Macro để không ảnh hưởng tới công việc khác mà không cần đóng app
 - Không yêu cầu về chuột xịn
 - Tích hợp unlock Fps và 1 số unlocker (injection) khác
@@ -72,7 +72,7 @@ build\app\win-unpacked\Cryss.exe
 
 ### Build và cập nhật bản đang cài
 
-`release.ps1` build cả backend lẫn Electron rồi chép đè lên thư mục cài đặt, giữ nguyên config combo, `mavuika.json`, gamepath và setting unlocker của người dùng:
+`release.ps1` build cả backend lẫn Electron rồi chép đè lên thư mục cài đặt, giữ nguyên config combo, gamepath và setting unlocker của người dùng:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File release.ps1

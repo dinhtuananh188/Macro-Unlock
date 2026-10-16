@@ -26,7 +26,6 @@ function Warn($msg)     { Write-Host "    !   $msg" -ForegroundColor Yellow }
 # File state cua user - build KHONG duoc lam mat
 $Preserve = @(
     "resources\config.json",
-    "resources\mavuika.json",
     "resources\unlocker\gamepath.json",
     "resources\unlocker\config.ini",
     "resources\unlocker\Plugins\UnlockerIsland\config.ini"

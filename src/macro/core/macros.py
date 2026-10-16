@@ -8,13 +8,11 @@ BUG FIX (2026-08):
 """
 
 import bisect
-import json
-import os
 import threading
 import time
 import pynput
 
-from .config_io import CONFIG_PATH, log_debug
+from .config_io import log_debug
 from .fps_utils import (
     fps2t, wait_exact,
     T_FPS_3AW, T_FPS_2AS_FIRST, T_FPS_2AS_SECOND,
@@ -300,8 +298,8 @@ def skke(fps):
 # Mavuika – Flamestrider (bike)
 #
 # Khac macro Skirk: combo Mavuika theo moc ms tuyet doi, khong phu thuoc FPS.
-# Toan bo timing nam trong mavuika.json canh config.json, sua duoc ma khong
-# phai build lai; thieu file thi dung _MAV_FALLBACK duoi day.
+# Toan bo timing nam trong MAV_TIMING ngay ben duoi; sua so xong phai build
+# lai (hoac chay lai backend khi dev).
 #
 # Ba che do chay:
 #   "loop"        – GIU nut thi lap lai chuoi; nha nut = dung ngay.
@@ -327,222 +325,98 @@ _mav_lock = threading.Lock()
 should_abort = lambda: False
 should_abort_once = lambda: False
 
-MAV_TIMING_PATH = os.path.join(os.path.dirname(CONFIG_PATH), "mavuika.json")
-
-# Ban du phong, sinh tu mavuika.json luc build nen luon dong bo.
-_MAV_FALLBACK = {
-        "C0:  Combo Mavuika CDCDCF (Full Combo)": {
-            "mode": "loop",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    200,
-                    "d_down"
-                ],
-                [
-                    250,
-                    "d_up"
-                ],
-                [
-                    320,
-                    "c_up"
-                ],
-                [
-                    370,
-                    "c_down"
-                ],
-                [
-                    570,
-                    "d_down"
-                ],
-                [
-                    620,
-                    "d_up"
-                ],
-                [
-                    1640,
-                    "c_up"
-                ],
-                [
-                    2160,
-                    "end"
-                ]
-            ]
-        },
-        "beat_q": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "q_down"
-                ],
-                [
-                    202,
-                    "q_up"
-                ],
-                [
-                    1757,
-                    "end"
-                ]
-            ]
-        },
-        "beat_c": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    300,
-                    "c_up"
-                ],
-                [
-                    360,
-                    "end"
-                ]
-            ]
-        },
-        "beat_d": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "d_down"
-                ],
-                [
-                    91,
-                    "d_up"
-                ],
-                [
-                    181,
-                    "end"
-                ]
-            ]
-        },
-        "beat_cd": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    200,
-                    "d_down"
-                ],
-                [
-                    291,
-                    "d_up"
-                ],
-                [
-                    442,
-                    "c_up"
-                ],
-                [
-                    532,
-                    "end"
-                ]
-            ]
-        },
-        "beat_cdf": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    200,
-                    "d_down"
-                ],
-                [
-                    291,
-                    "d_up"
-                ],
-                [
-                    1291,
-                    "c_up"
-                ],
-                [
-                    2144,
-                    "end"
-                ]
-            ]
-        },
-        "beat_click": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    64,
-                    "c_up"
-                ],
-                [
-                    124,
-                    "end"
-                ]
-            ]
-        },
-        "beat_click2": {
-            "mode": "once",
-            "events": [
-                [
-                    0,
-                    "c_down"
-                ],
-                [
-                    64,
-                    "c_up"
-                ],
-                [
-                    164,
-                    "c_down"
-                ],
-                [
-                    228,
-                    "c_up"
-                ],
-                [
-                    288,
-                    "end"
-                ]
-            ]
-        }
-    }
-
-_timing_cache = {"mtime": None, "data": _MAV_FALLBACK}
-
-
-def mav_timing():
-    """Doc mavuika.json, cache theo mtime nen sua file la an ngay lan chay sau."""
-    try:
-        mtime = os.path.getmtime(MAV_TIMING_PATH)
-    except OSError:
-        return _timing_cache["data"]
-
-    if mtime != _timing_cache["mtime"]:
-        try:
-            with open(MAV_TIMING_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            combos = {k: v for k, v in data.items() if not k.startswith("_")}
-            if not combos:
-                raise ValueError("khong co combo nao")
-            for name, c in combos.items():
-                if not c.get("events"):
-                    raise ValueError(f"combo '{name}' thieu events")
-            _timing_cache["data"] = combos
-            _timing_cache["mtime"] = mtime
-            log_debug(f"mavuika.json da nap lai ({len(combos)} combo)")
-        except Exception as e:
-            log_debug(f"mavuika.json loi ({e}), dung ban du phong")
-    return _timing_cache["data"]
+# Timing tung combo Mavuika (va combo GI dung chung engine).
+# event = (moc_ms, hanh_dong). c_down/c_up = giu/nha chuot trai (trong kich),
+# d_down/d_up = giu/nha Shift (luot), q_down/q_up = phim Q (chieu no), end = het.
+#
+# mode:
+#   "loop"        GIU nut thi lap lai chuoi; nha nut hoac alt-tab = dung ngay.
+#   "once"        GIU nut chay het chuoi 1 lan, KHONG lap; nha nut = ngat giua chung.
+#                 Dung cho combo dai: thuc chien co nhieu bien so, phai ngat duoc.
+#   "once_locked" Chay het chuoi bat ke nha nut; chi alt-tab khoi game moi dung.
+#                 Chi dung khi chac chan khong can ngat (vd danh dummy).
+# beat_*: nhip nho dung cho combo tu tao (palette Mavuika), khong hien o danh sach combo.
+MAV_TIMING = {
+    # Nguon: vulcanizer.netlify.app (zsksc-gen/mavuika-trainer) - COMBOS.cdcdcf
+    "C0:  Combo Mavuika CDCDCF (Full Combo)": {
+        "mode": "loop",
+        "events": [
+            (0, "c_down"), (200, "d_down"), (250, "d_up"), (320, "c_up"),
+            (370, "c_down"), (570, "d_down"), (620, "d_up"), (1640, "c_up"),
+            (2160, "end"),
+        ],
+    },
+    # Nguon: File "Mav OL full rotation.amc" - tach tung nhip
+    # Ghi chu: Nhip Q: no 202ms roi cho 1555ms (tong 1757ms).
+    "beat_q": {
+        "mode": "once",
+        "events": [
+            (0, "q_down"), (202, "q_up"), (1757, "end"),
+        ],
+    },
+    # Nguon: File "Mav OL full rotation.amc" - tach tung nhip
+    # Ghi chu: Nhip C: charge ngan 300ms roi nha, nghi 60ms (tong 360ms).
+    "beat_c": {
+        "mode": "once",
+        "events": [
+            (0, "c_down"), (300, "c_up"), (360, "end"),
+        ],
+    },
+    # Nguon: File "Mav OL full rotation.amc" - tach tung nhip
+    # Ghi chu: Nhip D: dash 91ms, nghi 90ms (tong 181ms).
+    "beat_d": {
+        "mode": "once",
+        "events": [
+            (0, "d_down"), (91, "d_up"), (181, "end"),
+        ],
+    },
+    # Nguon: File "Mav OL full rotation.amc" - tach tung nhip
+    # Ghi chu: Nhip CD: giu C, dash cat o 200ms, nha C o 442ms, nghi 90ms (tong 532ms).
+    "beat_cd": {
+        "mode": "once",
+        "events": [
+            (0, "c_down"), (200, "d_down"), (291, "d_up"), (442, "c_up"),
+            (532, "end"),
+        ],
+    },
+    # Nguon: File "Mav OL full rotation.amc" - tach tung nhip
+    # Ghi chu: Nhip CDF: nhu CD nhung giu them 1000ms roi nha ra F, nghi 853ms (tong 2144ms).
+    "beat_cdf": {
+        "mode": "once",
+        "events": [
+            (0, "c_down"), (200, "d_down"), (291, "d_up"), (1291, "c_up"),
+            (2144, "end"),
+        ],
+    },
+    # Nguon: Do click N1 64ms trong file "mavuika CDN1.amc"
+    # Ghi chu: Click 1 cai: nhan chuot trai 64ms roi nha, nghi 60ms (tong 124ms).
+    "beat_click": {
+        "mode": "once",
+        "events": [
+            (0, "c_down"), (64, "c_up"), (124, "end"),
+        ],
+    },
+    # Nguon: Do click N1 64ms trong file "mavuika CDN1.amc"
+    # Ghi chu: Click 2 cai: moi cai 64ms, cach nhau 100ms, nghi 60ms (tong 288ms). Doi nhip thi sua moc 164.
+    "beat_click2": {
+        "mode": "once",
+        "events": [
+            (0, "c_down"), (64, "c_up"), (164, "c_down"), (228, "c_up"),
+            (288, "end"),
+        ],
+    },
+    # Nguon: github.com/3azf55/GI-Macro-Manager (MIT)
+    # Tooltip: Overload N2W
+    "C0:  Combo Arlecchino Overload N2W (GI)": {
+        "mode": "loop",
+        "events": [
+            (0, "c_down"), (40, "c_up"), (80, "c_down"), (120, "c_up"),
+            (160, "c_down"), (200, "c_up"), (240, "c_down"), (280, "c_up"),
+            (320, "c_down"), (360, "c_up"), (840, "w_down"), (880, "w_up"),
+            (920, "w_down"), (960, "w_up"), (960, "end"),
+        ],
+    },
+}
 
 
 def _mav_release_all():
@@ -670,11 +544,11 @@ del _fn
 
 
 def mav_combo(name):
-    """Tao ham combo doc timing theo ten tu mavuika.json."""
+    """Tao ham combo doc timing theo ten trong MAV_TIMING."""
     def run(fps):
-        cfg = mav_timing().get(name)
+        cfg = MAV_TIMING.get(name)
         if not cfg:
-            log_debug(f"mavuika.json: khong tim thay combo {name!r}")
+            log_debug(f"MAV_TIMING: khong tim thay combo {name!r}")
             return
         events = cfg["events"]
         mode = cfg.get("mode", "loop")
@@ -835,8 +709,8 @@ def skkC0_EQA_60f(fps):
     skk5as(fps)
 
 
-# Ten combo Mavuika = key trong mavuika.json. Doi ten o day phai doi ca 3 noi:
-# mavuika.json, MAVUIKA_COMBOS (file nay), BUILTIN_COMBOS (src/UI/shared.js).
+# Ten combo Mavuika = key trong MAV_TIMING. Doi ten phai doi ca 3 noi:
+# MAV_TIMING, MAVUIKA_COMBOS (cung file nay), BUILTIN_COMBOS (src/UI/shared.js).
 MAVUIKA_COMBOS = (
     "C0:  Combo Mavuika CDCDCF (Full Combo)",
     # ── Lay tu GI-Macro-Manager (github.com/3azf55/GI-Macro-Manager, MIT) ──
@@ -868,7 +742,7 @@ STEP_MAP = {
     "skke":         skke,
     "skk5as":       skk5as,
     "skk5a":        skk5a,          # n5  – đã thêm
-    # ── Mavuika: dùng trong custom combo, key = tên trong mavuika.json ──
+    # ── Mavuika: dùng trong custom combo, key = tên trong MAV_TIMING ──
     "mav_cdcdcf":   _MAVUIKA_FNS[MAVUIKA_COMBOS[0]],
     # ── Mavuika: nhịp nhỏ cho combo tự tạo (số liệu từ Mav OL full rotation.amc) ──
     "mav_b_q":      mav_combo("beat_q"),
