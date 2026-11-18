@@ -42,6 +42,8 @@ pub struct Model<'a> {
     pub update: &'a UpdateState,
     pub custom_banner: bool,
     pub elevated: bool,
+    /// Id của combo đang chờ người dùng bấm phím (popup Gán phím đang mở).
+    pub capturing: Option<&'a str>,
 }
 
 pub enum Command {
@@ -49,6 +51,7 @@ pub enum Command {
     SetFps(i32),
     Bind { id: String, hotkey: String },
     CaptureBinding(String),
+    CancelCapture,
     Reload,
     NewProfile,
     EditProfile(String),
@@ -173,6 +176,7 @@ impl Views {
             painter.rect_stroke(rect, radius(10.0), Stroke::new(1.0, line_color()), StrokeKind::Inside);
             painter.galley(rect.min + vec2(14.0, 6.0), text, TEXT);
         }
+        if let Some(id) = model.capturing { self.bind_modal(ui, window, id, &model, &mut commands); }
         commands
     }
 
@@ -444,6 +448,45 @@ impl Views {
             if solid_button(ui, open, "update-open", "Mở trang tải về", Icon::Save).clicked() { commands.push(Command::OpenUrl(page)); }
         }
         if outline_neutral_button(ui, close_button, "update-close", "Đóng", Icon::Plus).clicked() || close { self.update_open = false; }
+    }
+
+
+    /// Popup "Gán phím cho …" của bản gốc (`#keyBindModal`).
+    fn bind_modal(&mut self, ui: &mut Ui, rect: Rect, id: &str, model: &Model<'_>, commands: &mut Vec<Command>) {
+        let (card, close) = Self::overlay(ui, rect, "bind", 448.0, 330.0);
+        let painter = ui.painter().clone();
+        let name = model.profiles.iter().position(|p| p.id == id).map_or_else(|| "Combo".to_owned(), |index| {
+            let profile = &model.profiles[index];
+            if profile.custom { profile.name.clone() } else { format!("Combo {}: {}", index + 1, profile.name) }
+        });
+        let icon_box = Rect::from_center_size(pos2(card.center().x, card.top() + 56.0), vec2(48.0, 48.0));
+        painter.rect_filled(icon_box, radius(12.0), alpha(TEAL, 0.15));
+        painter.rect_stroke(icon_box, radius(12.0), Stroke::new(1.0, alpha(TEAL, 0.3)), StrokeKind::Inside);
+        draw_icon(&painter, Icon::Keyboard, icon_box.center(), 26.0, TEAL);
+        let title = painter.layout(format!("Gán phím cho \"{name}\""), font(18.0, "h700"), TEXT, card.width() - 56.0);
+        let title_height = title.size().y;
+        painter.galley(pos2(card.center().x - title.size().x / 2.0, card.top() + 98.0), title, TEXT);
+        let mut y = card.top() + 98.0 + title_height + 12.0;
+        painter.text(pos2(card.center().x, y), Align2::CENTER_TOP, "Nhấn phím bất kỳ trên bàn phím hoặc nút chuột để gán.", font(13.0, "h400"), MUTED);
+        y += 22.0;
+        painter.text(pos2(card.center().x, y), Align2::CENTER_TOP, "Nhấn ESC để hủy", font(13.0, "h500"), MUTED);
+        y += 30.0;
+        let badge = Rect::from_center_size(pos2(card.center().x, y + 16.0), vec2(220.0, 34.0));
+        let pulse = 0.55 + 0.25 * ((ui.input(|input| input.time) * 3.0).sin() as f32 + 1.0) / 2.0;
+        painter.rect_filled(badge, radius(10.0), alpha(TEAL, 0.10 * pulse + 0.04));
+        painter.rect_stroke(badge, radius(10.0), Stroke::new(1.0, alpha(TEAL, 0.35)), StrokeKind::Inside);
+        painter.text(badge.center(), Align2::CENTER_CENTER, "Đang chờ bấm phím...", font(13.0, "h600"), TEAL);
+        ui.ctx().request_repaint_after(std::time::Duration::from_millis(60));
+        let top = card.bottom() - 62.0;
+        let clear = Rect::from_min_size(pos2(card.center().x - 8.0 - 150.0, top), vec2(150.0, 42.0));
+        let cancel = Rect::from_min_size(pos2(card.center().x + 8.0, top), vec2(110.0, 42.0));
+        let clear_response = ui.interact(clear, egui::Id::NULL.with("bind-clear"), Sense::click());
+        painter.rect_filled(clear, radius(12.0), alpha(DANGER, if clear_response.hovered() { 0.16 } else { 0.08 }));
+        painter.rect_stroke(clear, radius(12.0), Stroke::new(1.0, alpha(DANGER, 0.4)), StrokeKind::Inside);
+        painter.text(clear.center(), Align2::CENTER_CENTER, "Xóa phím gán", font(14.0, "h600"), DANGER);
+        if clear_response.clicked() { commands.push(Command::Bind { id: id.to_owned(), hotkey: String::new() }); }
+        let cancel_clicked = outline_neutral_button(ui, cancel, "bind-cancel", "Hủy", Icon::Plus).clicked();
+        if cancel_clicked || close { commands.push(Command::CancelCapture); }
     }
 
     fn sync_fps(&mut self, fps: i32) {

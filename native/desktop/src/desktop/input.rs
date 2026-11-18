@@ -50,6 +50,15 @@ mod tests {
     }
 
     #[test]
+    fn capture_ignores_the_clicks_used_to_press_the_bind_button() {
+        let layout = std::ptr::null_mut();
+        assert_eq!(PhysicalInput::Mouse(Target::MouseLeft).capture_target(layout), None);
+        assert_eq!(PhysicalInput::Mouse(Target::MouseRight).capture_target(layout), None);
+        assert_eq!(PhysicalInput::Mouse(Target::MouseMiddle).capture_target(layout), Some(Target::MouseMiddle));
+        assert_eq!(PhysicalInput::Mouse(Target::MouseX2).capture_target(layout), Some(Target::MouseX2));
+    }
+
+    #[test]
     fn matches_side_button_input_on_down_and_up() {
         assert_eq!(
             mouse_button(WM_XBUTTONDOWN, XBUTTON1),
@@ -612,6 +621,8 @@ impl PhysicalInput {
                 let character = char::from_u32(mapped)?;
                 (!character.is_control()).then(|| Target::Key(character.to_lowercase().collect()))
             }),
+            // Chuột trái và phải là cách bấm vào chính nút "Gán phím", nên không bao giờ là hotkey bắt được.
+            Self::Mouse(Target::MouseLeft | Target::MouseRight) => None,
             Self::Mouse(button) => Some(button.clone()),
         }
     }

@@ -31,8 +31,10 @@ const TITLE: &str = "Cryss";
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Mở lần hai thì đưa cửa sổ đang chạy lên trước, như phiên đơn của bản Electron.
+    // `CRYSS_ALLOW_MULTI` chỉ dùng khi kiểm thử cạnh một bản đang chạy.
     let _instance = match lock_instance() {
-        Ok(handle) => handle,
+        Ok(handle) => Some(handle),
+        Err(_) if std::env::var_os("CRYSS_ALLOW_MULTI").is_some() => None,
         Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
             if tray::show_window(TITLE) { return Ok(()); }
             return Err(error.into());
@@ -254,7 +256,9 @@ impl App {
                 }
             }
             InputEvent::Capture(target) => {
-                if let Some(id) = self.capture.take() { self.bind(&id, &hotkey_name(target)); }
+                // Esc hủy popup như bản gốc; mọi phím khác (và chuột giữa, nút phụ) được gán ngay.
+                if target == Target::Key("esc".into()) { self.cancel_capture(); }
+                else if let Some(id) = self.capture.take() { self.bind(&id, &hotkey_name(target)); }
             }
         }
     }
@@ -291,6 +295,11 @@ impl App {
             }
             Err(error) => { self.status = error; false }
         }
+    }
+
+    fn cancel_capture(&mut self) {
+        self.capture = None;
+        if let Some(monitor) = &self.monitor { monitor.set_capture(false); }
     }
 
     fn bind(&mut self, id: &str, key: &str) {
@@ -369,9 +378,10 @@ impl App {
                 if self.ensure_monitor(ctx) {
                     self.capture = Some(id);
                     if let Some(monitor) = &self.monitor { monitor.set_capture(true); }
-                    self.status = "Nhấn một phím hoặc nút chuột trong cửa sổ Cryss.".into();
+                    self.status.clear();
                 }
             }
+            Command::CancelCapture => self.cancel_capture(),
             Command::Reload => self.reload(),
             Command::NewProfile => self.open_editor(None),
             Command::EditProfile(id) => self.open_editor(Some(id)),
@@ -453,6 +463,7 @@ impl eframe::App for App {
             update: &self.update,
             custom_banner: self.banner_path.is_file(),
             elevated: self.elevated,
+            capturing: self.capture.as_deref(),
         };
         let ctx = ui.ctx().clone();
         let editor_was_open = self.editor.is_some();
