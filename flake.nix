@@ -1,5 +1,5 @@
 {
-  description = "A Nix-flake-based Python development environment";
+  description = "A Nix-flake-based Python and Rust development environment";
 
   inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1"; # unstable Nixpkgs
 
@@ -56,7 +56,7 @@
           python = pkgs."python${concatMajorMinor version}";
         in
         {
-          default = pkgs.mkShellNoCC {
+          default = pkgs.mkShell {
             venvDir = ".venv";
 
             postShellHook = ''
@@ -93,7 +93,7 @@
                 # or
                 # python.pkgs.ruff
               ])
-              ++ [ self.formatter.${system} ];
+              ++ [ pkgs.cargo pkgs.rustc self.formatter.${system} ];
           };
         }
       );

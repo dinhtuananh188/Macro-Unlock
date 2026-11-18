@@ -1,0 +1,14 @@
+[package]
+name = "cryss-timing"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = "thin"
+strip = "debuginfo"

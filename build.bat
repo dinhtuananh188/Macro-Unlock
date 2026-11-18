@@ -6,7 +6,12 @@ echo   Building Skirk Macro App (Cryss)
 echo ===================================
 
 echo.
-echo [1/2] Building Python backend (Cryss.exe)...
+echo [1/3] Building Rust timing library...
+cargo build --release --locked --manifest-path "native\timing\Cargo.toml" --target-dir "build\native"
+if errorlevel 1 exit /b %errorlevel%
+
+echo.
+echo [2/3] Building Python backend (Cryss.exe)...
 
 REM Create build folder if it doesn't exist
 if not exist "build" mkdir "build"
@@ -30,6 +35,7 @@ call pyinstaller ^
     --workpath "temp" ^
     --specpath "temp" ^
     --distpath "dist" ^
+    --add-binary "%CD%\native\release\cryss_timing.dll;." ^
     --collect-all pynput ^
     --hidden-import pynput.keyboard._win32 ^
     --hidden-import pynput.mouse._win32 ^
@@ -45,7 +51,7 @@ if %errorlevel% neq 0 (
 cd ..
 
 echo.
-echo [2/2] Building Electron UI...
+echo [3/3] Building Electron UI...
 
 cd src\UI
 

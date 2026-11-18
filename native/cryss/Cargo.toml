@@ -1,0 +1,13 @@
+[package]
+name = "cryss-native"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+publish = false
+
+[dependencies]
+serde_json = { version = "1", features = ["arbitrary_precision", "preserve_order"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_System_Threading", "Win32_System_ProcessStatus"] }

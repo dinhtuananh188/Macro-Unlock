@@ -8,7 +8,39 @@ Phiên bản này đã sửa hoàn toàn và dùng bisect (O(log n)) thay vì v�
 """
 
 import bisect
+import ctypes
+import os
+from pathlib import Path
+import sys
 import time
+
+
+def _load_native_wait():
+    if os.environ.get("CRYSS_RUST_TIMING") != "1":
+        return None
+
+    library_name = {
+        "win32": "cryss_timing.dll",
+        "linux": "libcryss_timing.so",
+    }.get(sys.platform)
+    if library_name is None:
+        return None
+
+    if getattr(sys, "frozen", False):
+        directory = Path(sys._MEIPASS)
+    else:
+        directory = Path(__file__).resolve().parents[2] / "build" / "native" / "release"
+
+    try:
+        wait = ctypes.CDLL(str(directory / library_name)).cryss_wait_seconds_v1
+    except (OSError, AttributeError):
+        return None
+    wait.argtypes = [ctypes.c_double]
+    wait.restype = ctypes.c_uint8
+    return wait
+
+
+_NATIVE_WAIT = _load_native_wait()
 
 # ── Calibration tables (immutable tuples, allocated ONCE at module load) ────────
 # Format: ((fps_breakpoints...), (delay_values...))
@@ -91,6 +123,10 @@ def wait_exact(duration, start_time=None):
     """
     if start_time is None:
         start_time = time.perf_counter()
+    if _NATIVE_WAIT is not None:
+        remaining = duration - (time.perf_counter() - start_time)
+        if remaining <= 0 or _NATIVE_WAIT(remaining):
+            return
     while True:
         remaining = duration - (time.perf_counter() - start_time)
         if remaining <= 0:

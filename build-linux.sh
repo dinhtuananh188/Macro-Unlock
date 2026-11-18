@@ -10,29 +10,29 @@ cd "$PROJECT_DIR"
 
 mkdir -p build/dist build/temp
 
+if command -v nix &>/dev/null && [ -f "flake.nix" ]; then
+    toolchain=(nix develop --command)
+else
+    toolchain=()
+fi
+
+echo
+echo "[*] Building Rust timing library..."
+"${toolchain[@]}" cargo build --release --locked \
+    --manifest-path native/timing/Cargo.toml --target-dir build/native
+
 echo
 echo "[*] Building Linux standalone binary via PyInstaller..."
-if command -v nix &>/dev/null && [ -f "flake.nix" ]; then
-    nix develop --command pyinstaller \
-        --clean \
-        --noupx \
-        --onefile \
-        --name "Cryss" \
-        --distpath "build/dist" \
-        --workpath "build/temp" \
-        --specpath "build/temp" \
-        src-linux/main.py
-else
-    pyinstaller \
-        --clean \
-        --noupx \
-        --onefile \
-        --name "Cryss" \
-        --distpath "build/dist" \
-        --workpath "build/temp" \
-        --specpath "build/temp" \
-        src-linux/main.py
-fi
+"${toolchain[@]}" pyinstaller \
+    --clean \
+    --noupx \
+    --onefile \
+    --name "Cryss" \
+    --distpath "build/dist" \
+    --workpath "build/temp" \
+    --specpath "build/temp" \
+    --add-binary "$PROJECT_DIR/build/native/release/libcryss_timing.so:." \
+    src-linux/main.py
 
 echo
 echo "==================================="

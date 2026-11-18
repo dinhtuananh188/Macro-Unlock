@@ -50,7 +50,11 @@ pnpm start
 
 Electron sẽ tự khởi động backend Python từ `src/macro/main.py`. Khi Windows hỏi nâng quyền, hãy chấp nhận để macro hoạt động.
 
+Xem [lõi Rust Native và benchmark](docs/rust-native.md) để build và kiểm thử engine bằng CLI.
+
 ## Đóng gói ứng dụng
+
+Build cần Rust stable từ 1.85. Xem [hướng dẫn timing Rust](docs/rust-timing.md) để bật, benchmark và quay về Python.
 
 Sau khi đã cài Python dependencies và `pnpm install`, chạy:
 
