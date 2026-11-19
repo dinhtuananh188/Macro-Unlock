@@ -377,7 +377,7 @@ impl App {
             Command::CaptureBinding(id) => {
                 if self.ensure_monitor(ctx) {
                     self.capture = Some(id);
-                    if let Some(monitor) = &self.monitor { monitor.set_capture(true); }
+                    // Phím được bắt từ sự kiện của chính cửa sổ (popup), không qua hook toàn cục.
                     self.status.clear();
                 }
             }

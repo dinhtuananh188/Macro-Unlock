@@ -382,6 +382,30 @@ impl Views {
         (card, close)
     }
 
+
+    /// Phím hoặc nút chuột đầu tiên người dùng bấm trong cửa sổ. Chuột trái / phải không bao giờ được gán
+    /// (đó là cách bấm các nút trong popup); Esc đã được `overlay` xử lý để hủy.
+    fn captured_hotkey(ctx: &egui::Context) -> Option<String> {
+        ctx.input_mut(|input| {
+            let found = input.events.iter().enumerate().find_map(|(index, event)| match event {
+                egui::Event::Key { key, physical_key, pressed: true, repeat: false, .. } => {
+                    if *key == egui::Key::Escape { return None; }
+                    let physical = physical_key.unwrap_or(*key);
+                    let key = if physical.name().len() == 1 && physical.name().as_bytes()[0].is_ascii_alphanumeric() { physical } else { *key };
+                    super::editor::keyboard_hotkey(key).map(|name| (index, name))
+                }
+                egui::Event::PointerButton { button, pressed: true, .. } => match button {
+                    egui::PointerButton::Middle => Some((index, "middle".to_owned())),
+                    egui::PointerButton::Extra1 => Some((index, "mouse_3".to_owned())),
+                    egui::PointerButton::Extra2 => Some((index, "mouse_4".to_owned())),
+                    _ => None,
+                },
+                _ => None,
+            });
+            found.map(|(index, name)| { input.events.remove(index); name })
+        })
+    }
+
     fn feed_modal(&mut self, ui: &mut Ui, rect: Rect, model: &Model<'_>) {
         let (card, close) = Self::overlay(ui, rect, "feed", 640.0, 600.0);
         let painter = ui.painter().clone();
@@ -454,6 +478,7 @@ impl Views {
     /// Popup "Gán phím cho …" của bản gốc (`#keyBindModal`).
     fn bind_modal(&mut self, ui: &mut Ui, rect: Rect, id: &str, model: &Model<'_>, commands: &mut Vec<Command>) {
         let (card, close) = Self::overlay(ui, rect, "bind", 448.0, 330.0);
+        if let Some(hotkey) = Self::captured_hotkey(ui.ctx()) { commands.push(Command::Bind { id: id.to_owned(), hotkey }); }
         let painter = ui.painter().clone();
         let name = model.profiles.iter().position(|p| p.id == id).map_or_else(|| "Combo".to_owned(), |index| {
             let profile = &model.profiles[index];
